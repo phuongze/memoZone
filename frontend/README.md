@@ -4,5 +4,19 @@ This template provides a minimal setup to get React working in Vite with HMR and
 
 Currently, two official plugins are available:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+
+## Vercel Deploy
+
+Deploy the `frontend/` folder as a Vercel project.
+
+Set these environment variables in Vercel:
+
+```env
+VITE_API_URL=https://your-backend-domain.com/api
+VITE_SOCKET_URL=https://your-backend-domain.com
+VITE_ENABLE_REALTIME=false
+```
+
+`frontend/vercel.json` already rewrites all routes to `index.html` so React Router works on refresh.
+
+Keep `VITE_ENABLE_REALTIME=false` when your backend is API-only or deployed without Socket.IO. Set it to `true` only if the backend exposes realtime events.
