@@ -24,12 +24,15 @@ function resolveSocketUrl() {
     return import.meta.env.VITE_SOCKET_URL;
   }
 
-  const apiUrl = import.meta.env.VITE_API_URL;
-  if (apiUrl) {
-    return apiUrl.replace(/\/api\/?$/, "");
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL.replace(/\/api\/?$/, "");
   }
 
-  return "http://localhost:5000";
+  if (import.meta.env.DEV) {
+    return "http://localhost:5000";
+  }
+
+  return "/_/backend";
 }
 
 export function getRealtimeSocket() {
