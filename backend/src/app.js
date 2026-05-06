@@ -6,6 +6,11 @@ const bcrypt = require("bcryptjs");
 const authMiddleware = require("./middleware/auth");
 const { connectMongoIfNeeded } = require("./utils/mongo");
 const {
+  findUserByUsername,
+  listAllowedUsernames,
+  ensureAuthUsersReady,
+} = require("./services/authUserStore");
+const {
   listWishes,
   createWish,
   updateWishDetails,
@@ -49,21 +54,6 @@ function buildMilestones(startDate) {
   });
 }
 
-const allowedUsers = [
-  {
-    username: process.env.USER_ONE_NAME || "memory_admin",
-    passwordHash:
-      process.env.USER_ONE_HASH ||
-      "$2b$10$62IKeZ15DgeLIyzKw4T80OymIAvI3kXf1Ql2oC3w.8kMd5YEvw.u.",
-  },
-  {
-    username: process.env.USER_TWO_NAME || "love_guest",
-    passwordHash:
-      process.env.USER_TWO_HASH ||
-      "$2b$10$8mQTy6hGU8mjl1usSUWefufAbhExLoqPh.OBYaGakvdojRsJo5bvC",
-  },
-];
-
 const corsOrigins = resolveAllowedOrigins();
 
 app.use(
@@ -80,7 +70,10 @@ app.post("/api/auth/login", async (req, res) => {
     return res.status(400).json({ message: "Please provide username and password" });
   }
 
-  const matchedUser = allowedUsers.find((user) => user.username === username);
+  await connectMongoIfNeeded();
+  await ensureAuthUsersReady();
+
+  const matchedUser = await findUserByUsername(username);
 
   if (!matchedUser) {
     return res.status(401).json({ message: "Invalid login credentials" });
@@ -154,7 +147,7 @@ app.patch("/api/wishes/:id", authMiddleware, async (req, res) => {
 
 app.get("/api/counter", authMiddleware, async (req, res) => {
   await connectMongoIfNeeded();
-  const members = allowedUsers.map((user) => user.username);
+  const members = await listAllowedUsernames();
   const counterData = await loadCounterData(members);
 
   return res.json({
@@ -168,7 +161,7 @@ app.get("/api/counter", authMiddleware, async (req, res) => {
 
 app.patch("/api/counter", authMiddleware, async (req, res) => {
   await connectMongoIfNeeded();
-  const members = allowedUsers.map((user) => user.username);
+  const members = await listAllowedUsernames();
   const counterData = await loadCounterData(members);
 
   const nextStartDate = req.body.startDate;
@@ -196,7 +189,7 @@ app.patch("/api/counter", authMiddleware, async (req, res) => {
 
 app.post("/api/counter/invites", authMiddleware, async (req, res) => {
   await connectMongoIfNeeded();
-  const members = allowedUsers.map((user) => user.username);
+  const members = await listAllowedUsernames();
   const counterData = await loadCounterData(members);
   const from = req.user.username;
   const to = members.find((username) => username !== from);
@@ -231,7 +224,7 @@ app.post("/api/counter/invites", authMiddleware, async (req, res) => {
 
 app.patch("/api/counter/invites/:id", authMiddleware, async (req, res) => {
   await connectMongoIfNeeded();
-  const members = allowedUsers.map((user) => user.username);
+  const members = await listAllowedUsernames();
   const counterData = await loadCounterData(members);
   const { id } = req.params;
   const { action, code } = req.body;
@@ -277,7 +270,7 @@ app.patch("/api/counter/invites/:id", authMiddleware, async (req, res) => {
 
 app.get("/api/profile", authMiddleware, async (req, res) => {
   await connectMongoIfNeeded();
-  const members = allowedUsers.map((user) => user.username);
+  const members = await listAllowedUsernames();
   const counterData = await loadCounterData(members);
 
   const me = counterData.profiles[req.user.username];
@@ -291,7 +284,7 @@ function emitProfileUpdated() {}
 
 app.patch("/api/profile", authMiddleware, async (req, res) => {
   await connectMongoIfNeeded();
-  const members = allowedUsers.map((user) => user.username);
+  const members = await listAllowedUsernames();
   const counterData = await loadCounterData(members);
   const currentProfile = counterData.profiles[req.user.username] || {
     username: req.user.username,
