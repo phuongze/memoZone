@@ -1,24 +1,30 @@
-const fs = require("fs/promises");
+const mongoose = require("mongoose");
 
-async function readJson(path, fallbackValue) {
-  try {
-    const raw = await fs.readFile(path, "utf8");
-    return JSON.parse(raw);
-  } catch (error) {
-    if (error.code === "ENOENT") {
-      await writeJson(path, fallbackValue);
-      return fallbackValue;
-    }
-    throw error;
+const isMongoEnabled =
+  String(process.env.USE_MONGO || "false").toLowerCase() === "true";
+
+let connectPromise = null;
+
+async function connectMongoIfNeeded() {
+  if (!isMongoEnabled) return false;
+
+  if (!process.env.MONGODB_URI) {
+    throw new Error("USE_MONGO=true nhưng chưa có MONGODB_URI");
   }
-}
 
-async function writeJson(path, data) {
-  const serialized = JSON.stringify(data, null, 2);
-  await fs.writeFile(path, serialized, "utf8");
+  if (!connectPromise) {
+    connectPromise = mongoose.connect(process.env.MONGODB_URI, {
+      bufferCommands: false,
+    });
+  }
+
+  await connectPromise;
+  console.log("✅ MongoDB connected");
+
+  return true;
 }
 
 module.exports = {
-  readJson,
-  writeJson,
+  connectMongoIfNeeded,
+  isMongoEnabled,
 };
