@@ -1,3 +1,19 @@
 {
-  "buildCommand": "npm run build --prefix frontend"
+  "buildCommand": "npm run build --prefix frontend",
+  "outputDirectory": "frontend/dist",
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/backend/api/$1.js",
+      "methods": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+    },
+    {
+      "src": "/(.*\\..*)",
+      "dest": "/frontend/dist/$1"
+    },
+    {
+      "src": "/.*",
+      "dest": "/frontend/dist/index.html"
+    }
+  ]
 }
