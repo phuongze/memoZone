@@ -25,14 +25,20 @@ function resolveSocketUrl() {
   }
 
   if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL.replace(/\/api\/?$/, "");
+    const apiUrl = import.meta.env.VITE_API_URL;
+    if (apiUrl === "/api") {
+      return window.location.origin;
+    }
+
+    const stripped = apiUrl.replace(/\/api\/?$/, "");
+    return stripped || window.location.origin;
   }
 
   if (import.meta.env.DEV) {
     return "http://localhost:5000";
   }
 
-  return "/_/backend";
+  return window.location.origin;
 }
 
 export function getRealtimeSocket() {

@@ -9,7 +9,7 @@ function resolveApiBaseURL() {
     return "http://localhost:5000/api";
   }
 
-  return "/_/backend/api";
+  return "/api";
 }
 
 const api = axios.create({

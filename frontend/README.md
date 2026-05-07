@@ -12,8 +12,8 @@ Deploy the `frontend/` folder as a Vercel project.
 Set these environment variables in Vercel:
 
 ```env
-VITE_API_URL=/_/backend/api
-VITE_SOCKET_URL=/_/backend
+VITE_API_URL=/api
+VITE_SOCKET_URL=/api
 VITE_ENABLE_REALTIME=false
 ```
 
@@ -25,4 +25,4 @@ Keep `VITE_ENABLE_REALTIME=false` when your backend is API-only or deployed with
 
 If you deploy the whole repo as one Vercel multi-service project, use the root [`vercel.json`](../vercel.json) file.
 
-The frontend will call the backend under `/_/backend/api` by default in production if `VITE_API_URL` is not set.
+The frontend will call the backend under `/api` by default in production if `VITE_API_URL` is not set.

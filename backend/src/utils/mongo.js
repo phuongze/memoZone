@@ -1,8 +1,10 @@
 const mongoose = require("mongoose");
 
 const isMongoEnabled = String(process.env.USE_MONGO || "false").toLowerCase() === "true";
-
-let connectPromise = null;
+const globalMongoCache = globalThis.__mongooseCache || (globalThis.__mongooseCache = {
+  conn: null,
+  promise: null,
+});
 
 async function connectMongoIfNeeded() {
   if (!isMongoEnabled) return false;
@@ -11,11 +13,17 @@ async function connectMongoIfNeeded() {
     throw new Error("USE_MONGO=true nhung chua co MONGODB_URI");
   }
 
-  if (!connectPromise) {
-    connectPromise = mongoose.connect(process.env.MONGODB_URI);
+  if (globalMongoCache.conn) {
+    return true;
   }
 
-  await connectPromise;
+  if (!globalMongoCache.promise) {
+    globalMongoCache.promise = mongoose.connect(process.env.MONGODB_URI, {
+      bufferCommands: false,
+    });
+  }
+
+  globalMongoCache.conn = await globalMongoCache.promise;
   return true;
 }
 
