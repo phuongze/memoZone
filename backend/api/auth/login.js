@@ -1,3 +1,6 @@
 const { login } = require("../../src/serverless/http");
 
-module.exports = login;
+// Vercel serverless handler
+module.exports = async (req, res) => {
+    return login(req, res);
+};
