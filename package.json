@@ -1,0 +1,7 @@
+{
+  "name": "memozone",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "npm run build --prefix frontend"
+  }
+}
