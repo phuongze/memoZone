@@ -6,18 +6,21 @@ dotenv.config();
 
 const PORT = process.env.PORT || 5000;
 
-(async function startServer() {
-  try {
-    if (!process.env.JWT_SECRET) {
-      throw new Error("Missing JWT_SECRET in environment.");
-    }
+// Only start server locally, not on Vercel
+if (process.env.NODE_ENV !== "production") {
+  (async function startServer() {
+    try {
+      if (!process.env.JWT_SECRET) {
+        throw new Error("Missing JWT_SECRET in environment.");
+      }
 
-    await connectMongoIfNeeded();
-    app.listen(PORT, () => {
-      console.log(`Server running on http://localhost:${PORT}`);
-    });
-  } catch (error) {
-    console.error("Cannot start server", error.message);
-    process.exit(1);
-  }
-})();
+      await connectMongoIfNeeded();
+      app.listen(PORT, () => {
+        console.log(`Server running on http://localhost:${PORT}`);
+      });
+    } catch (error) {
+      console.error("Cannot start server", error.message);
+      process.exit(1);
+    }
+  })();
+}
